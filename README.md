@@ -64,3 +64,5 @@ For each row / road segment:
 - Column 2: "length" contains the distance along the segment in miles
 - Columns 3 - 26: "weekday_0" ... "weekday_23" contain the average speed along the road segment in miles per hour on weekdays at different hours. 0 refers to midnight to 1 am...23 refers to the hour before midnight.
 - Columns 27 - 50: "weekend_0" ... "weekend_23" contain the average speed along the road segment in miles per hour on weekends at different hours. 0 refers to midnight to 1 am...23 refers to the hour before midnight.
+
+
