@@ -242,14 +242,14 @@ def dijkstras(graph, start, target):
             break
 
         if current_distance <= distances[current_node]:
-            for neighbor, weight in graph[float(current_node)].items():
+            for neighbor, weight in graph[(current_node)].items():
                 distance = current_distance + weight
 
                 if distance < distances[neighbor]:
                     distances[neighbor] = distance
                     heapq.heappush(priority_queue, (distance, neighbor))
 
-    return distances[float(target)]
+    return distances[(target)]
 
 def average_edge_distance(known_coordinates, graph):
     total_distance = 0
@@ -257,9 +257,9 @@ def average_edge_distance(known_coordinates, graph):
 
     for node1, neighbors in graph.items():
         for node2 in neighbors:
-            coord1 = known_coordinates[node1]
-            coord2 = known_coordinates[node2]
-            distance = euclidean_distance(coord1[0], coord1[1], coord2[0], coord2[1])
+            print(node1)
+            print(node2)
+            distance = euclidean_distance(float(node1[0]), float(node1[1]), float(node2[0]), float(node2[1]))
             total_distance += distance
             count += 1
 
@@ -275,16 +275,16 @@ def find_closest_coordinates(target_coordinates, known_coordinates, avgdist):
 
     for key, value in known_coordinates.items():
         distance = euclidean_distance(target_coordinates[0], target_coordinates[1], key[0], key[1])
-        if distance < avgdist*2:
-            return key
-        elif distance < min_distance:
+        """ if distance < avgdist*2:
+            return key """
+        if distance < min_distance:
             min_distance = distance
             closest_coordinates = key
 
     return closest_coordinates
 
 
-def match_passenger_to_driver_t3(drivers, passengers, adjacency_dict, nodes):
+def match_passenger_to_driver_t3(drivers, passengers, adjacency, clusters):
     start_time = time.time()
 
     # Convert dates to datetime objects and initialize priority queues
@@ -311,8 +311,8 @@ def match_passenger_to_driver_t3(drivers, passengers, adjacency_dict, nodes):
                 # Get the node IDs from the latitude and longitude using the Nodes dictionary
                 s1_time = time.time()
                 print(f"Start")
-                start_node = find_closest_coordinates((float(current_driver[1]), float(current_driver[2])), nodes, avg_dist)
-                end_node = find_closest_coordinates((float(passenger[1]), float(passenger[2])), nodes, avg_dist)
+                start_node = find_closest_coordinates((float(current_driver[1]), float(current_driver[2])), clusters, avg_dist)
+                end_node = find_closest_coordinates((float(passenger[1]), float(passenger[2])), clusters, avg_dist)
                 print(f"closest coord done")
                 e1_time = time.time()
                 d1_time = e1_time - s1_time
@@ -320,7 +320,7 @@ def match_passenger_to_driver_t3(drivers, passengers, adjacency_dict, nodes):
                 print(f"--\n--\n--\n")
                 print(f"Start")
                 s_time = time.time()
-                path_time = dijkstras(adjacency_dict, start_node, end_node)
+                path_time = dijkstras(adjacency, start_node, end_node)
                 print(f"Dijkstras done")
                 count1 = count1 + 1
                 e_time = time.time()
@@ -343,7 +343,7 @@ def match_passenger_to_driver_t3(drivers, passengers, adjacency_dict, nodes):
             print(f"Driver assigned to Passenger: {current_driver} -> {current_passenger}")
 
             # Introduce a 95% chance for the driver to be pushed back
-        if random.random() < 0.2:
+        if random.random() < 0.95:
             if shortest_path_time < 10000:
                 drive_duration = timedelta(hours=shortest_path_time)
             else:
@@ -356,7 +356,7 @@ def match_passenger_to_driver_t3(drivers, passengers, adjacency_dict, nodes):
 
 # Example usage
 # Assuming you have an adjacency_dict, drivers_matrix, passengers_matrix, and Nodes dictionary
-match_passenger_to_driver_t3(drivers_matrix[1:], passengers_matrix[1:], adjacency, clusters)
+#match_passenger_to_driver_t3(drivers_matrix[1:], passengers_matrix[1:], adjacency, clusters)
 
 def floyd_warshall(graph):
     vertices = list(graph.keys())
@@ -370,7 +370,7 @@ def floyd_warshall(graph):
         nIndex[key] = index
     
     # Initialize the distance matrix
-    counte = 0
+    #counte = 0
     for i in vertices:
         row = []
         for j in vertices:
@@ -381,28 +381,33 @@ def floyd_warshall(graph):
             else:
                 row.append(float('inf'))
         dist.append(row)
-        counte = counte + 1
-        print(counte)
+        #counte = counte + 1
+        #print(counte)
 
     # Rest of the Floyd-Warshall algorithm
     for k in vertices:
-        print(f"flooooooooooyd MAYYYYWEATHHHHHER")
+        print(f"flooooooooooyd MAYYYYWEATHHHHHERRRRRRRRR")
         for i in vertices:
-            print(f"MIDDLEE")
+            #print(f"MIDDLEEEEeeEEEEEE")
             for j in vertices:
-                print(f"inner loop")
+                #print(f"inner loop")
                 if dist[nIndex[i]][nIndex[k]] + dist[nIndex[k]][nIndex[j]] < dist[nIndex[i]][nIndex[j]]:
                     dist[nIndex[i]][nIndex[j]] = dist[nIndex[i]][nIndex[k]] + dist[nIndex[k]][nIndex[j]]
 
     return dist, nIndex
 
 
-#adjacency_mat = [[[]]]
+adjacency_mat = [[[]]]
 print(f"at this step")
-#adjacency , indices = floyd_warshall(adjacency_dict)
-#adjacency_mat.append(adjacency)
-#for i in range(20):
-#    print(adjacency_mat[0][1][i])
+ftime = time.time()
+adjacency1 , indices = floyd_warshall(adjacency)
+et = time.time()
+elapsed_time = et - ftime
+print(f"Matching process complete. Elapsed time: {elapsed_time} seconds")
+print(f"YAYYYYYY!!!!!!!")
+adjacency_mat.append(adjacency1)
+for i in range(20):
+    print(adjacency_mat[0][1][i])
 
 def match_passenger_to_driver_t4(drivers, passengers, adjacency_matrices, nodes, nIndex):
     start_time = time.time()
