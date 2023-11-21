@@ -288,7 +288,7 @@ def match_passenger_to_driver_t3(drivers, passengers, adjacency, clusters):
     driver_heap = [(datetime.strptime(driver[0], '%m/%d/%Y %H:%M:%S'), driver) for driver in drivers]
     passenger_heap = [(datetime.strptime(passenger[0], '%m/%d/%Y %H:%M:%S'), passenger) for passenger in passengers]
 
-    #driver_heap = driver_heap[:300]
+    #driver_heap = driver_heap[:100]
     #passenger_heap = passenger_heap[:3000]
     # Convert lists to heaps
     heapq.heapify(driver_heap)
@@ -516,6 +516,10 @@ def match_passenger_to_driver_t5(drivers, passengers, adjacency_matrices, nodes,
                     passenger_start_node = find_closest_coordinates((float(passenger[1]),float(passenger[2])), nodes1)
                     driver_node = find_closest_coordinates((float(passenger[1]),float(passenger[2])), nodes1)
                     path_time = dijkstras(adj,driver_node,passenger_start_node)
+                    """ if passenger_start_node == passenger_end_node:
+                        path_time = dijkstras(adj, passenger_start_node, passenger_end_node) - path_time
+                    else:
+                        path_time = adjacency_matrices[nIndex[passenger_start_node]][nIndex[passenger_end_node]] - path_time """
                 
                 if path_time < shortest_path_time:
                     shortest_path_time = path_time
@@ -540,109 +544,3 @@ def match_passenger_to_driver_t5(drivers, passengers, adjacency_matrices, nodes,
     print(f"Matching process complete. Elapsed time: {elapsed_time} seconds")
 
 match_passenger_to_driver_t5(drivers_matrix[1:], passengers_matrix[1:], adjacency1, clusters2, indices, clusters, adjacency)
-
-""" # Heuristic function for A*
-
-def heuristic(current_node, goal_node, current_time, passengers):
-    
-    proximity_score = 0
-    for passenger_time, passenger in passengers:
-        if passenger != current_node and passenger != goal_node:
-            distance_to_passenger = euclidean_distance(float(current_node[0]), float(current_node[1]), float(passenger[1]), float(passenger[2]))
-            distance_to_goal = euclidean_distance(float(passenger[1]), float(passenger[2]), float(goal_node[0]), float(goal_node[1]))
-            time_difference = abs((current_time - passenger_time).total_seconds()) / 60  # Convert time to minutes
-            if time_difference <= 10:  # Check if the passenger is within 10 minutes of the goal time
-                proximity_score += 1 / (distance_to_passenger + distance_to_goal)
-
-    return (euclidean_distance(float(current_node[0]), float(current_node[1]), float(goal_node[0]), float(goal_node[1])) + (current_time.timestamp() / 60) + proximity_score)
-
-import heapq
-
-def a_star(graph, start, target, heuristic):
-    node_indices = {node: i for i, node in enumerate(graph)}
-    num_nodes = len(graph)
-    distances = [float('inf')] * num_nodes
-    distances[node_indices[start]] = 0
-
-    priority_queue = [(heuristic, 0, start)]
-    heapq.heapify(priority_queue)
-
-    while priority_queue:
-        current_priority, current_distance, current_node = heapq.heappop(priority_queue)
-
-        if current_node == target:
-            break
-
-        current_node_index = node_indices[current_node]
-
-        if current_distance <= distances[current_node_index]:
-            for neighbor, weight in graph[current_node].items():
-                neighbor_index = node_indices[neighbor]
-                distance = current_distance + weight
-
-                if distance < distances[neighbor_index]:
-                    distances[neighbor_index] = distance
-                    priority = distance + heuristic
-                    heapq.heappush(priority_queue, (priority, distance, neighbor))
-
-    return distances[node_indices[target]]
-
-def match_passenger_to_driver_t5(drivers, passengers, adjacency, clusters):
-    start_time = time.time()
-
-    # Convert dates to datetime objects and initialize priority queues
-    driver_heap = [(datetime.strptime(driver[0], '%m/%d/%Y %H:%M:%S'), driver) for driver in drivers]
-    passenger_heap = [(datetime.strptime(passenger[0], '%m/%d/%Y %H:%M:%S'), passenger) for passenger in passengers]
-
-    # Convert lists to heaps
-    heapq.heapify(driver_heap)
-
-    count = 0
-    #avg_dist = average_edge_distance(clusters, adjacency)
-    avg_dist = 1
-
-    # Match drivers to passengers based on earliest date/time
-    while driver_heap and passenger_heap:
-        current_driver_time, current_driver = heapq.heappop(driver_heap)
-        shortest_path_time = float('inf')
-        current_passenger = None
-        current_passenger_time = None
-        
-        for passenger_time, passenger in passenger_heap:
-            minni = timedelta(minutes=7)
-            max_wait_time = current_driver_time - minni
-            if passenger_time < current_driver_time and passenger_time > max_wait_time:
-                start_node = find_closest_coordinates((float(current_driver[1]), float(current_driver[2])), clusters, float(avg_dist))
-                end_node = find_closest_coordinates((float(passenger[1]), float(passenger[2])), clusters, avg_dist)
-
-                path_time = a_star(adjacency, start_node, end_node, heuristic(start_node,end_node, current_driver_time, passenger_heap))
-
-                if path_time < shortest_path_time:
-                    shortest_path_time = path_time
-                    current_passenger = passenger
-                    current_passenger_time = passenger_time
-        
-        if current_passenger:
-            passenger_heap.remove((current_passenger_time, current_passenger))
-            current_driver[1] = current_passenger[3]
-            current_driver[2] = current_passenger[4]
-            count += 1
-            print(count)
-            print(f"Driver assigned to Passenger: {current_driver} -> {current_passenger}")
-
-            # Introduce a 95% chance for the driver to be pushed back
-            if random.random() < 0.95:
-                if shortest_path_time < 10000:
-                    drive_duration = timedelta(hours=shortest_path_time)
-                else:
-                    drive_duration = timedelta(minutes=2)
-                heapq.heappush(driver_heap, (current_driver_time + drive_duration, current_driver))
-
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    print(f"Matching process complete. Elapsed time: {elapsed_time} seconds")
-
-match_passenger_to_driver_t5(drivers_matrix[1:], passengers_matrix[1:], adjacency_mat, nodes) """
-
-
-
