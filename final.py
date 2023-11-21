@@ -488,7 +488,7 @@ def match_passenger_to_driver_t5(drivers, passengers, adjacency_matrices, nodes,
     start_time = time.time()
 
     driver_heap = [(datetime.strptime(driver[0], '%m/%d/%Y %H:%M:%S'), driver) for driver in drivers]
-    passenger_heap = [(datetime.strptime(passenger[0], '%m/%d/%Y %H:%M:%S'), passenger) for passenger in passengers]
+    passenger_heap = [(0, datetime.strptime(passenger[0], '%m/%d/%Y %H:%M:%S'), passenger) for passenger in passengers]
 
     heapq.heapify(driver_heap)
 
@@ -497,12 +497,15 @@ def match_passenger_to_driver_t5(drivers, passengers, adjacency_matrices, nodes,
         shortest_path_time = float('inf')
         current_passenger = None
         current_passenger_time = None
+        heapq.heapify(passenger_heap)
+        passenger_heap = list(passenger_heap)
+        max_priority = passenger_heap[0][0]
 
-        for passenger_time, passenger in passenger_heap:
-            #minni = timedelta(minutes=7)
-            #max_wait_time = current_driver_time - minni
+        for priority, passenger_time, passenger in passenger_heap:
+            minni = timedelta(minutes=7)
+            max_wait_time = current_driver_time - minni
 
-            if passenger_time < current_driver_time: #and passenger_time > max_wait_time:
+            if passenger_time < current_driver_time and priority >= max_priority-1 and passenger_time >= max_wait_time:
                 driver_node = find_closest_coordinates((float(current_driver[1]),float(current_driver[2])), nodes)
                 passenger_start_node = find_closest_coordinates((float(passenger[1]),float(passenger[2])), nodes)
                 passenger_end_node = find_closest_coordinates((float(passenger[3]),float(passenger[4])), nodes)
@@ -525,6 +528,15 @@ def match_passenger_to_driver_t5(drivers, passengers, adjacency_matrices, nodes,
                     shortest_path_time = path_time
                     current_passenger = passenger
                     current_passenger_time = passenger_time
+                
+            if passenger_time < max_wait_time:
+                if random.random() < 0.33:
+                    passenger_heap.remove((current_passenger_time, current_passenger))
+                else:
+                    drive = timedelta(minutes=7)
+                    passenger[0] = str(passenger_time + drive)
+                    priority = priority + 1
+                    passenger_time = passenger_time + drive
                 
         if current_passenger:
             passenger_heap.remove((current_passenger_time, current_passenger))
