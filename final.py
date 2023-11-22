@@ -564,12 +564,14 @@ def match_passenger_to_driver_t5(drivers, passengers, adjacency_matrices, nIndex
 
 def match_passenger_to_driver_b1(drivers, passengers, adjacency_matrices, nIndex, nodes, adj, nodes1):
     start_time = time.time()
+    drivers = drivers[:100]
+   #passengers = passengers[:1000]
 
     driver_heap = [(datetime.strptime(driver[0], '%m/%d/%Y %H:%M:%S'), driver) for driver in drivers]
-    passenger_heap = [(0, datetime.strptime(passenger[0], '%m/%d/%Y %H:%M:%S'), passenger) for passenger in passengers]
-
+    passenger_heap = [((0, datetime.strptime(passenger[0], '%m/%d/%Y %H:%M:%S')), passenger) for passenger in passengers]
+    print(passenger_heap)
     heapq.heapify(driver_heap)
-
+    count = 0
     while driver_heap and passenger_heap:
         current_driver_time, current_driver = heapq.heappop(driver_heap)
         shortest_path_time = float('inf')
@@ -577,9 +579,9 @@ def match_passenger_to_driver_b1(drivers, passengers, adjacency_matrices, nIndex
         current_passenger_time = None
         heapq.heapify(passenger_heap)
         passenger_heap = list(passenger_heap)
-        max_priority = passenger_heap[0][0]
+        max_priority = passenger_heap[0][0][0]
 
-        for priority, passenger_time, passenger in passenger_heap:
+        for (priority, passenger_time), passenger in passenger_heap:
             minni = timedelta(minutes=7)
             max_wait_time = current_driver_time - minni
 
@@ -594,39 +596,37 @@ def match_passenger_to_driver_b1(drivers, passengers, adjacency_matrices, nIndex
                 path_time = ride_duration - driver_passenger
 
                 if passenger_start_node == driver_node:
-                    passenger_start_node = find_closest_coordinates((float(passenger[1]),float(passenger[2])), nodes1)
-                    driver_node = find_closest_coordinates((float(passenger[1]),float(passenger[2])), nodes1)
+                    passenger_start_node = find_closest_coordinates((float(passenger[1]),float(passenger[2])), nodes1, False)
+                    driver_node = find_closest_coordinates((float(passenger[1]),float(passenger[2])), nodes1, False)
                     path_time = dijkstras(adj,driver_node,passenger_start_node)
-                    """ if passenger_start_node == passenger_end_node:
-                        path_time = dijkstras(adj, passenger_start_node, passenger_end_node) - path_time
-                    else:
-                        path_time = adjacency_matrices[nIndex[passenger_start_node]][nIndex[passenger_end_node]] - path_time """
                 
                 if path_time < shortest_path_time:
                     shortest_path_time = path_time
                     current_passenger = passenger
                     current_passenger_time = passenger_time
+                    current_passenger_prioity = priority
+                   
                 
             if passenger_time < max_wait_time:
                 if random.random() < 0.33:
-                    passenger_heap.remove((current_passenger_time, current_passenger))
+                    passenger_heap.remove(((priority, passenger_time), passenger))
                 else:
+                    # Passenger has been waiting too long
                     drive = timedelta(minutes=7)
                     passenger[0] = str(passenger_time + drive)
                     priority = priority + 1
                     passenger_time = passenger_time + drive
                 
         if current_passenger:
-            passenger_heap.remove((current_passenger_time, current_passenger))
+            passenger_heap.remove(((priority, current_passenger_time), current_passenger))
             current_driver[1] = current_passenger[3]
             current_driver[2] = current_passenger[4]
+            count += 1
+            print(count)
             print(f"Driver assigned to Passenger: {current_driver} -> {current_passenger}")
 
         if random.random() < 0.95:
-            if shortest_path_time < 10000:
-                drive_duration = timedelta(hours=shortest_path_time)
-            else:
-                drive_duration = timedelta(minutes=2)
+            drive_duration = timedelta(minutes=2)
             heapq.heappush(driver_heap, (current_driver_time + drive_duration, current_driver))
 
     end_time = time.time()
