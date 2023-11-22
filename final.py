@@ -364,7 +364,7 @@ def match_passenger_to_driver_t2(drivers, passengers):
 
 def match_passenger_to_driver_t3(drivers, passengers, adjacency, clusters):
     '''
-    T2 of case study
+    T3 of case study
 
     Parameters:
     - drivers matrix: time, lat, long
@@ -424,6 +424,19 @@ def match_passenger_to_driver_t3(drivers, passengers, adjacency, clusters):
     print(f"Matching process complete. Elapsed time: {elapsed_time} seconds")
 
 def match_passenger_to_driver_t4(drivers, passengers, adjacency_matrices, nIndex, nodes):
+    '''
+    T4 of case study
+
+    Parameters:
+    - drivers matrix: time, lat, long
+    - passengers matrix: time, lat, long
+    - adjacency_matrices: FW matrix
+    - nIndex: dictionary of FW indices
+    - nodes: clusters
+
+    Description:
+    T3 strategy optimization by using a Floy Warshall matrix to find minimum weight path in sub linear time
+    '''
     start_time = time.time()
 
     # Convert dates to datetime objects and initialize priority queues
@@ -432,8 +445,6 @@ def match_passenger_to_driver_t4(drivers, passengers, adjacency_matrices, nIndex
 
     # Convert lists to heaps
     heapq.heapify(driver_heap)
-
-    count = 0
 
     # Match drivers to passengers based on earliest date/time
     while driver_heap and passenger_heap:
@@ -461,8 +472,7 @@ def match_passenger_to_driver_t4(drivers, passengers, adjacency_matrices, nIndex
             passenger_heap.remove((current_passenger_time, current_passenger))
             current_driver[1] = current_passenger[3]
             current_driver[2] = current_passenger[4]
-            count = count + 1
-            print(count)
+
             #print(f"Driver assigned to Passenger: {current_driver} -> {current_passenger}")
 
             # Introduce a 95% chance for the driver to be pushed back
@@ -478,6 +488,21 @@ def match_passenger_to_driver_t4(drivers, passengers, adjacency_matrices, nIndex
     print(f"Matching process complete. Elapsed time: {elapsed_time} seconds")
 
 def match_passenger_to_driver_t5(drivers, passengers, adjacency_matrices, nIndex, nodes, adj, nodes1):
+    '''
+    T5 of case study
+
+    Parameters:
+    - drivers matrix: time, lat, long
+    - passengers matrix: time, lat, long
+    - adjacency_matrices: FW matrix
+    - nIndex: dictionary of FW indices
+    - nodes: clusters
+    - adj: orignal adjacency matrix with all nodes 
+    - nodes: original nodes
+
+    Description:
+    Extension of T5. For drives within the clusters, we used dijkstra's to run within those clusters
+    '''
     start_time = time.time()
     drivers = drivers[:10]
     passengers = passengers[:100]
@@ -487,8 +512,6 @@ def match_passenger_to_driver_t5(drivers, passengers, adjacency_matrices, nIndex
 
     # Convert lists to heaps
     heapq.heapify(driver_heap)
-
-    count = 0
 
     # Match drivers to passengers based on earliest date/time
     while driver_heap and passenger_heap:
@@ -621,8 +644,6 @@ def match_passenger_to_driver_b2(drivers, passengers, adjacency_matrices, nodes,
     # Convert lists to heaps
     heapq.heapify(driver_heap)
 
-    count = 0
-
     # Match drivers to passengers based on earliest date/time
     while driver_heap and passenger_heap:
         current_driver_time, current_driver = heapq.heappop(driver_heap)
@@ -672,8 +693,6 @@ def match_passenger_to_driver_b2(drivers, passengers, adjacency_matrices, nodes,
             passenger_heap.remove((current_passenger_time, current_passenger))
             current_driver[1] = current_passenger[3]
             current_driver[2] = current_passenger[4]
-            count = count + 1
-            print(count)
             print(f"Driver assigned to Passenger: {current_driver} -> {current_passenger}")
 
             # Introduce a 95% chance for the driver to be pushed back
